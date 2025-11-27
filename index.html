@@ -1,128 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard NUAM - Cliente API</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .fade-in { opacity: 0; transform: translateY(10px); transition: .6s ease; }
+        .fade-in.show { opacity: 1; transform: translateY(0); }
+    </style>
 </head>
 
-<body class="bg-pink-50 text-gray-800 font-sans">
+<body class="bg-gray-100 text-gray-800">
 
-    <div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="max-w-6xl mx-auto px-4 mt-12">
 
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-pink-600 drop-shadow-sm">Panel NUAM</h1>
-            <p class="text-gray-500 text-sm">Monitoreo de Calificaciones vía API JWT</p>
-        </div>
+        <div id="login-section" class="bg-white p-8 rounded-3xl shadow-lg max-w-md mx-auto fade-in">
+            <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Acceso Seguro</h1>
 
-        <div id="login-section"
-            class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-pink-100 mb-10">
-
-            <div class="text-center mb-6">
-                <div class="bg-pink-100 w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-pink-600">
-                    <i class="bi bi-person-circle text-4xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold">Acceso al Dashboard</h2>
-                <p class="text-xs text-gray-400 tracking-widest">Autenticación JWT</p>
-            </div>
-
-            <div class="space-y-5">
-                <input id="api-username" type="text"
-                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-pink-400 outline-none"
+            <div class="space-y-4">
+                <input id="api-username"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl"
                     placeholder="Usuario">
 
                 <input id="api-password" type="password"
-                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-pink-400 outline-none"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl"
                     placeholder="Contraseña">
 
                 <button onclick="obtenerToken()"
-                    class="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl">
+                    class="w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-bold">
                     Ingresar
                 </button>
-
-                <div id="login-message" class="text-center text-sm min-h-[20px]"></div>
             </div>
+
+            <p id="login-message" class="text-center mt-4 text-sm h-6"></p>
         </div>
 
-        <div id="data-section" class="hidden opacity-0 translate-y-4 transition-all duration-500">
+        <div id="data-section" class="hidden fade-in mt-10">
 
-            <div class="flex justify-between items-center bg-white p-5 mb-8 rounded-3xl shadow border border-gray-100">
+            <div class="flex justify-between items-center bg-white p-5 rounded-xl shadow-md border border-gray-200">
                 <div>
-                    <p class="text-sm text-gray-400">Sesión Activa</p>
-                    <p id="token-display" class="font-bold text-pink-600">Token...</p>
+                    <h2 class="text-xl font-bold text-gray-800">Dashboard NUAM</h2>
+                    <p id="token-display" class="text-xs text-gray-500"></p>
                 </div>
 
                 <div class="flex gap-3">
                     <button onclick="cargarCalificaciones()"
-                        class="px-4 py-2 bg-white border rounded-xl hover:bg-pink-50">
-                        <i class="bi bi-arrow-clockwise"></i>
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar
                     </button>
 
                     <button onclick="cerrarSesion()"
-                        class="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl">
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
                         <i class="bi bi-box-arrow-right"></i> Salir
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-pink-600 text-white p-6 rounded-3xl shadow">
-                    <p class="text-sm opacity-90">Hoy</p>
-                    <h2 id="stat-hoy" class="text-5xl font-extrabold">0</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
+                    <p class="text-sm text-gray-500">Total registros</p>
+                    <h3 id="stat-total" class="text-4xl font-bold text-blue-700">0</h3>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow border">
-                    <p class="text-sm text-gray-500">Total Registros</p>
-                    <h2 id="total-registros" class="text-4xl font-extrabold text-gray-800">0</h2>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
+                    <p class="text-sm text-gray-500">Promedio monto base</p>
+                    <h3 id="stat-promedio" class="text-4xl font-bold text-green-600">0</h3>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow border">
-                    <p class="text-sm text-gray-500">Gráfico por País</p>
-                    <h2 class="text-xl font-bold text-pink-600">Resumen</h2>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
+                    <p class="text-sm text-gray-500">País más frecuente</p>
+                    <h3 id="stat-top-pais" class="text-3xl font-bold text-purple-700">-</h3>
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-3xl shadow border mb-10">
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="bi bi-bar-chart-line text-pink-600"></i> Resumen por País
-                </h3>
-                <canvas id="chartVisitas" class="h-64"></canvas>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
+                    <h3 class="font-bold mb-3">Calificaciones por país</h3>
+                    <canvas id="chartPaises" height="220"></canvas>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
+                    <h3 class="font-bold mb-3">Tipos de impuesto</h3>
+                    <canvas id="chartTipos" height="220"></canvas>
+                </div>
             </div>
 
-            <div class="bg-white rounded-3xl shadow border overflow-hidden">
-                <div class="p-6 border-b bg-gray-50">
-                    <h3 class="font-bold text-lg">Listado de Calificaciones</h3>
+            <div class="bg-white mt-10 rounded-2xl shadow border border-gray-200 overflow-hidden">
+
+                <div class="p-4 border-b">
+                    <h3 class="font-bold text-lg">Detalle de Calificaciones</h3>
                 </div>
 
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b">
+                    <thead class="bg-gray-50 text-gray-500 uppercase">
                         <tr>
-                            <th class="px-6 py-3">ID</th>
-                            <th class="px-6 py-3">País</th>
-                            <th class="px-6 py-3">Tipo</th>
-                            <th class="px-6 py-3">Monto</th>
-                            <th class="px-6 py-3">Factor</th>
-                            <th class="px-6 py-3">Analista</th>
-                            <th class="px-6 py-3">Fecha</th>
+                            <th class="p-3">ID</th>
+                            <th class="p-3">País</th>
+                            <th class="p-3">Tipo</th>
+                            <th class="p-3">Monto</th>
+                            <th class="p-3">Factor</th>
+                            <th class="p-3">Analista</th>
                         </tr>
                     </thead>
-
-                    <tbody id="tabla-body" class="divide-y">
-                        <tr>
-                            <td colspan="7" class="py-6 text-center text-gray-400">Esperando datos...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tabla-body"></tbody>
                 </table>
             </div>
 
-        </div> 
-
-    </div> 
+        </div>
+    </div>
 
     <script src="cliente_api.js"></script>
+
 </body>
 </html>
