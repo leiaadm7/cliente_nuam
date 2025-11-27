@@ -1,171 +1,167 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_URL = "http://127.0.0.1:8000/api/";
 
-let chartPaises = null;
-let chartTipos = null;
+let token = null;
 
-
+// ---------------------- LOGIN ------------------------
 async function obtenerToken() {
     const username = document.getElementById("api-username").value;
     const password = document.getElementById("api-password").value;
 
-    const msg = document.getElementById("login-message");
+    const mensaje = document.getElementById("login-message");
 
     if (!username || !password) {
-        msg.innerText = "Ingresa usuario y contraseña";
-        msg.classList = "text-red-600";
+        mensaje.innerText = "Debe ingresar usuario y contraseña.";
+        mensaje.classList.add("text-red-600");
         return;
     }
 
-    msg.innerText = "Verificando...";
-    msg.classList = "text-gray-600";
-
     try {
-        const res = await fetch(`${API_BASE_URL}/token/`, {
+        const response = await fetch(API_URL + "token/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ username, password })
         });
 
-        if (!res.ok) {
-            msg.innerText = "Credenciales incorrectas";
-            msg.classList = "text-red-600";
+        if (!response.ok) {
+            mensaje.innerText = "Credenciales incorrectas.";
+            mensaje.classList.add("text-red-600");
             return;
         }
 
-        const data = await res.json();
-        localStorage.setItem("access_token", data.access);
+        const data = await response.json();
+        token = data.access;
 
-        msg.innerText = "Acceso concedido";
-        msg.classList = "text-green-600";
+        mensaje.innerText = "";
+        mostrarPanelDatos();
 
-        setTimeout(mostrarDashboard, 600);
-
-    } catch (e) {
-        msg.innerText = "Error de conexión";
-        msg.classList = "text-red-600";
+    } catch (error) {
+        console.error("Error al obtener token:", error);
     }
 }
 
-function mostrarDashboard() {
+// ---------------------- MOSTRAR DASHBOARD ------------------------
+function mostrarPanelDatos() {
     document.getElementById("login-section").classList.add("hidden");
 
-    const sec = document.getElementById("data-section");
-    sec.classList.remove("hidden");
+    const panel = document.getElementById("data-section");
+    panel.classList.remove("hidden");
 
-    setTimeout(() => sec.classList.add("show"), 50);
-
-    document.getElementById(
-        "token-display"
-    ).innerText = "Token activo";
+    setTimeout(() => panel.classList.add("show"), 50);
 
     cargarCalificaciones();
 }
 
+// ---------------------- CERRAR SESIÓN ------------------------
 function cerrarSesion() {
-    localStorage.clear();
-    location.reload();
+    token = null;
+    document.getElementById("data-section").classList.add("hidden");
+    document.getElementById("login-section").classList.remove("hidden");
 }
 
-
-
-
+// ---------------------------------------------------------------
+// ---------------------- CARGAR DATOS ---------------------------
+// ---------------------------------------------------------------
 async function cargarCalificaciones() {
-    const token = localStorage.getItem("access_token");
+    try {
+        const resp = await fetch(API_URL + "calificaciones/", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
-    const res = await fetch(`${API_BASE_URL}/calificaciones/`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+        const datos = await resp.json();
 
-    const data = await res.json();
-    const lista = data.results || data;  
+        llenarTabla(datos);
+        actualizarEstadisticas(datos);
+        graficarPaises(datos);
+        graficarTipos(datos);
 
-    actualizarTabla(lista);
-    generarEstadisticas(lista);
-    generarGraficos(lista);
+    } catch (error) {
+        console.error("Error al cargar calificaciones:", error);
+    }
 }
 
+// ---------------------- TABLA ------------------------
+function llenarTabla(data) {
+    const tbody = document.getElementById("tabla-body");
+    tbody.innerHTML = "";
 
-
-function actualizarTabla(lista) {
-    const tabla = document.getElementById("tabla-body");
-    tabla.innerHTML = "";
-
-    lista.forEach(r => {
-        tabla.innerHTML += `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="p-3">#${r.id}</td>
-                <td class="p-3">${r.pais}</td>
-                <td class="p-3">${r.tipo}</td>
-                <td class="p-3">$${r.monto_base}</td>
-                <td class="p-3">${r.factor}</td>
-                <td class="p-3">${r.analista_username}</td>
+    data.forEach(c => {
+        tbody.innerHTML += `
+            <tr class="border-b">
+                <td class="p-3">${c.id}</td>
+                <td class="p-3">${c.pais}</td>
+                <td class="p-3">${c.tipo}</td>
+                <td class="p-3">${c.monto_base}</td>
+                <td class="p-3">${c.factor}</td>
+                <td class="p-3">${c.analista_username}</td>
             </tr>
         `;
     });
 }
 
+// ---------------------- TARJETAS ------------------------
+function actualizarEstadisticas(data) {
+    if (!data.length) {
+        document.getElementById("stat-total").innerText = 0;
+        document.getElementById("stat-promedio").innerText = 0;
+        document.getElementById("stat-top-pais").innerText = "-";
+        return;
+    }
 
+    document.getElementById("stat-total").innerText = data.length;
 
-function generarEstadisticas(lista) {
+    const promedio = data.reduce((acc, x) => acc + parseFloat(x.monto_base), 0) / data.length;
+    document.getElementById("stat-promedio").innerText = promedio.toFixed(2);
 
-    // Total
-    document.getElementById("stat-total").innerText = lista.length;
-
-    // Promedio monto
-    const promedio =
-        lista.reduce((acc, r) => acc + parseFloat(r.monto_base), 0) / lista.length;
-
-    document.getElementById("stat-promedio").innerText =
-        promedio.toFixed(2);
-
-    // País más común
-    let conteo = {};
-    lista.forEach(r => {
-        conteo[r.pais] = (conteo[r.pais] || 0) + 1;
+    const countPaises = {};
+    data.forEach(x => {
+        countPaises[x.pais] = (countPaises[x.pais] || 0) + 1;
     });
 
-    const maxPais = Object.entries(conteo).sort((a, b) => b[1] - a[1])[0];
-    document.getElementById("stat-top-pais").innerText = maxPais ? maxPais[0] : "-";
+    const top = Object.entries(countPaises).sort((a, b) => b[1] - a[1])[0][0];
+    document.getElementById("stat-top-pais").innerText = top;
 }
 
+// ---------------------- GRÁFICO PAÍSES ------------------------
+let chartPaises = null;
 
-
-function generarGraficos(lista) {
-
-    const porPais = {};
-    const porTipo = {};
-
-    lista.forEach(r => {
-        porPais[r.pais] = (porPais[r.pais] || 0) + 1;
-        porTipo[r.tipo] = (porTipo[r.tipo] || 0) + 1;
-    });
-
-    const ctx1 = document.getElementById("chartPaises").getContext("2d");
-    const ctx2 = document.getElementById("chartTipos").getContext("2d");
+function graficarPaises(data) {
+    const cont = document.getElementById("chartPaises").getContext("2d");
 
     if (chartPaises) chartPaises.destroy();
-    if (chartTipos) chartTipos.destroy();
 
-    chartPaises = new Chart(ctx1, {
+    const counts = {};
+    data.forEach(c => counts[c.pais] = (counts[c.pais] || 0) + 1);
+
+    chartPaises = new Chart(cont, {
         type: "bar",
         data: {
-            labels: Object.keys(porPais),
+            labels: Object.keys(counts),
             datasets: [{
                 label: "Cantidad",
-                data: Object.values(porPais),
-                backgroundColor: ["#3b82f6", "#38bdf8", "#1e40af"],
-            }],
+                data: Object.values(counts)
+            }]
         }
     });
+}
 
-    chartTipos = new Chart(ctx2, {
-        type: "doughnut",
+// ---------------------- GRÁFICO TIPOS ------------------------
+let chartTipos = null;
+
+function graficarTipos(data) {
+    const cont = document.getElementById("chartTipos").getContext("2d");
+
+    if (chartTipos) chartTipos.destroy();
+
+    const counts = {};
+    data.forEach(c => counts[c.tipo] = (counts[c.tipo] || 0) + 1);
+
+    chartTipos = new Chart(cont, {
+        type: "pie",
         data: {
-            labels: Object.keys(porTipo),
+            labels: Object.keys(counts),
             datasets: [{
-                data: Object.values(porTipo),
-                backgroundColor: ["#10b981", "#6366f1", "#f59e0b"],
-            }],
+                data: Object.values(counts)
+            }]
         }
     });
 }
