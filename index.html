@@ -1,25 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <title>NUAM - Login</title>
-  <link rel="stylesheet" href="assets/css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard NUAM - Cliente API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="page-login">
-  <main class="card login-card">
-    <h2 class="title">Ingreso - NUAM</h2>
-    <form id="loginForm" class="form">
-      <label>Usuario</label>
-      <input id="username" required />
-      <label>Contraseña</label>
-      <input id="password" type="password" required />
-      <div class="actions">
-        <button type="submit" class="btn primary">Ingresar</button>
-      </div>
-      <p id="error" class="error"></p>
-    </form>
-  </main>
 
-  <script type="module" src="assets/js/auth.js"></script>
+<body class="bg-pink-50 text-gray-800 font-sans">
+
+    <div class="max-w-6xl mx-auto px-4 py-10">
+
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-pink-600 drop-shadow-sm">Panel NUAM</h1>
+            <p class="text-gray-500 text-sm">Monitoreo de Calificaciones vía API JWT</p>
+        </div>
+
+        <div id="login-section"
+            class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-pink-100 mb-10">
+
+            <div class="text-center mb-6">
+                <div class="bg-pink-100 w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-pink-600">
+                    <i class="bi bi-person-circle text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold">Acceso al Dashboard</h2>
+                <p class="text-xs text-gray-400 tracking-widest">Autenticación JWT</p>
+            </div>
+
+            <div class="space-y-5">
+                <input id="api-username" type="text"
+                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-pink-400 outline-none"
+                    placeholder="Usuario">
+
+                <input id="api-password" type="password"
+                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-pink-400 outline-none"
+                    placeholder="Contraseña">
+
+                <button onclick="obtenerToken()"
+                    class="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl">
+                    Ingresar
+                </button>
+
+                <div id="login-message" class="text-center text-sm min-h-[20px]"></div>
+            </div>
+        </div>
+
+        <div id="data-section" class="hidden opacity-0 translate-y-4 transition-all duration-500">
+
+            <div class="flex justify-between items-center bg-white p-5 mb-8 rounded-3xl shadow border border-gray-100">
+                <div>
+                    <p class="text-sm text-gray-400">Sesión Activa</p>
+                    <p id="token-display" class="font-bold text-pink-600">Token...</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="cargarCalificaciones()"
+                        class="px-4 py-2 bg-white border rounded-xl hover:bg-pink-50">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+
+                    <button onclick="cerrarSesion()"
+                        class="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl">
+                        <i class="bi bi-box-arrow-right"></i> Salir
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-pink-600 text-white p-6 rounded-3xl shadow">
+                    <p class="text-sm opacity-90">Hoy</p>
+                    <h2 id="stat-hoy" class="text-5xl font-extrabold">0</h2>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow border">
+                    <p class="text-sm text-gray-500">Total Registros</p>
+                    <h2 id="total-registros" class="text-4xl font-extrabold text-gray-800">0</h2>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow border">
+                    <p class="text-sm text-gray-500">Gráfico por País</p>
+                    <h2 class="text-xl font-bold text-pink-600">Resumen</h2>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow border mb-10">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="bi bi-bar-chart-line text-pink-600"></i> Resumen por País
+                </h3>
+                <canvas id="chartVisitas" class="h-64"></canvas>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow border overflow-hidden">
+                <div class="p-6 border-b bg-gray-50">
+                    <h3 class="font-bold text-lg">Listado de Calificaciones</h3>
+                </div>
+
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3">ID</th>
+                            <th class="px-6 py-3">País</th>
+                            <th class="px-6 py-3">Tipo</th>
+                            <th class="px-6 py-3">Monto</th>
+                            <th class="px-6 py-3">Factor</th>
+                            <th class="px-6 py-3">Analista</th>
+                            <th class="px-6 py-3">Fecha</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tabla-body" class="divide-y">
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-gray-400">Esperando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div> 
+
+    </div> 
+
+    <script src="cliente_api.js"></script>
 </body>
 </html>
