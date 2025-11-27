@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>NUAM - Dashboard</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="page-dashboard">
+  <header class="topbar">
+    <h1>NUAM - Panel Admin</h1>
+    <div>
+      <button class="btn" id="btnReload">Recargar</button>
+      <button class="btn danger" id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="card kpi" id="kpi-total">Total: --</div>
+    <div class="card kpi" id="kpi-paises">Países: --</div>
+    <div class="card kpi" id="kpi-tipos">Tipos: --</div>
+    <div class="card kpi" id="kpi-ultimolog">Último log: --</div>
+  </section>
+
+  <section class="charts">
+    <div class="card">
+      <h3>Registros por País</h3>
+      <canvas id="chartPaises" height="120"></canvas>
+    </div>
+    <div class="card">
+      <h3>Distribución por Tipo</h3>
+      <canvas id="chartTipos" height="120"></canvas>
+    </div>
+  </section>
+
+  <section class="list">
+    <div class="card">
+      <div class="list-actions">
+        <a href="calificaciones.html" class="btn primary">Ver Calificaciones</a>
+        <a href="crear.html" class="btn">Crear Nueva</a>
+        <a href="historial.html" class="btn">Ver Historial</a>
+      </div>
+      <table id="tablaCalificaciones" class="table">
+        <thead>
+          <tr><th>ID</th><th>País</th><th>Tipo</th><th>Monto</th><th>Factor</th><th>Analista</th><th>Acciones</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script type="module" src="assets/js/app.js"></script>
+  <script type="module" src="assets/js/charts.js"></script>
+</body>
+</html>

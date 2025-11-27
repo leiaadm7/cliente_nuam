@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>NUAM - Crear Calificación</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="page-form">
+  <header class="topbar">
+    <h1>Crear Calificación</h1>
+    <div><a href="calificaciones.html" class="btn">Volver</a></div>
+  </header>
+
+  <main class="card form-card">
+    <form id="formCrear">
+      <label>País</label>
+      <select id="pais">
+        <option value="CHILE">Chile</option>
+        <option value="PERU">Perú</option>
+        <option value="COLOMBIA">Colombia</option>
+      </select>
+
+      <label>Tipo</label>
+      <select id="tipo">
+        <option value="IVA">IVA</option>
+        <option value="RENTA">Renta</option>
+        <option value="ADUANA">Aduana</option>
+      </select>
+
+      <label>Monto base</label>
+      <input id="monto_base" type="number" step="0.01" required />
+
+      <label>Factor</label>
+      <input id="factor" type="number" step="0.0001" required />
+
+      <div class="actions">
+        <button class="btn primary" type="submit">Crear</button>
+        <a href="calificaciones.html" class="btn">Cancelar</a>
+      </div>
+      <p id="msg" class="info"></p>
+    </form>
+  </main>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
