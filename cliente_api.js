@@ -2,7 +2,6 @@ const API_URL = "http://127.0.0.1:8000/api/";
 
 let token = null;
 
-// ---------------------- LOGIN ------------------------
 async function obtenerToken() {
     const username = document.getElementById("api-username").value;
     const password = document.getElementById("api-password").value;
@@ -39,7 +38,6 @@ async function obtenerToken() {
     }
 }
 
-// ---------------------- MOSTRAR DASHBOARD ------------------------
 function mostrarPanelDatos() {
     document.getElementById("login-section").classList.add("hidden");
 
@@ -51,16 +49,12 @@ function mostrarPanelDatos() {
     cargarCalificaciones();
 }
 
-// ---------------------- CERRAR SESIÓN ------------------------
 function cerrarSesion() {
     token = null;
     document.getElementById("data-section").classList.add("hidden");
     document.getElementById("login-section").classList.remove("hidden");
 }
 
-// ---------------------------------------------------------------
-// ---------------------- CARGAR DATOS ---------------------------
-// ---------------------------------------------------------------
 async function cargarCalificaciones() {
     try {
         const resp = await fetch(API_URL + "calificaciones/", {
@@ -79,7 +73,6 @@ async function cargarCalificaciones() {
     }
 }
 
-// ---------------------- TABLA ------------------------
 function llenarTabla(data) {
     const tbody = document.getElementById("tabla-body");
     tbody.innerHTML = "";
@@ -98,7 +91,6 @@ function llenarTabla(data) {
     });
 }
 
-// ---------------------- TARJETAS ------------------------
 function actualizarEstadisticas(data) {
     if (!data.length) {
         document.getElementById("stat-total").innerText = 0;
@@ -121,7 +113,6 @@ function actualizarEstadisticas(data) {
     document.getElementById("stat-top-pais").innerText = top;
 }
 
-// ---------------------- GRÁFICO PAÍSES ------------------------
 let chartPaises = null;
 
 function graficarPaises(data) {
@@ -144,7 +135,6 @@ function graficarPaises(data) {
     });
 }
 
-// ---------------------- GRÁFICO TIPOS ------------------------
 let chartTipos = null;
 
 function graficarTipos(data) {
