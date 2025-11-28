@@ -7,108 +7,267 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        .fade-in { opacity: 0; transform: translateY(10px); transition: .6s ease; }
+        .fade-in.show { opacity: 1; transform: translateY(0); }
+        .scroller::-webkit-scrollbar { width: 8px; height: 8px; }
+        .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800 font-sans">
 
-    <div class="max-w-6xl mx-auto px-4 mt-12">
+    <div class="max-w-7xl mx-auto px-4 mt-8 pb-12">
 
-        <div id="login-section" class="bg-white p-8 rounded-3xl shadow-lg max-w-md mx-auto fade-in">
-            <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Acceso Seguro</h1>
+        <div id="login-section" class="bg-white p-8 rounded-3xl shadow-xl max-w-md mx-auto fade-in mt-20">
+            <h1 class="text-3xl font-bold text-center text-blue-800 mb-2">NUAM Exchange</h1>
+            <p class="text-center text-gray-500 mb-6 text-sm">Portal de Gestión Tributaria</p>
 
             <div class="space-y-4">
-                <input id="api-username"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    placeholder="Usuario">
+                <div>
+                    <label class="text-xs font-bold text-gray-600 uppercase ml-1">Usuario</label>
+                    <input id="api-username" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: admin">
+                </div>
 
-                <input id="api-password" type="password"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    placeholder="Contraseña">
+                <div>
+                    <label class="text-xs font-bold text-gray-600 uppercase ml-1">Contraseña</label>
+                    <input id="api-password" type="password" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+                </div>
 
-                <button onclick="obtenerToken()"
-                    class="w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-bold">
-                    Ingresar
+                <button onclick="obtenerToken()" class="w-full py-3 bg-blue-700 text-white rounded-xl hover:bg-blue-800 transition font-bold shadow-lg shadow-blue-200">
+                    Ingresar al Sistema
                 </button>
             </div>
 
-            <p id="login-message" class="text-center mt-4 text-sm h-6"></p>
+            <p id="login-message" class="text-center mt-4 text-sm text-red-600 font-medium h-5"></p>
         </div>
 
-        <div id="data-section" class="hidden fade-in mt-10">
+        <div id="data-section" class="hidden fade-in">
 
-            <div class="flex justify-between items-center bg-white p-5 rounded-xl shadow-md border border-gray-200">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Dashboard NUAM</h2>
-                    <p id="token-display" class="text-xs text-gray-500"></p>
+            <div class="flex flex-col xl:flex-row justify-between items-center bg-white p-5 rounded-xl shadow-md border border-gray-200 mb-8">
+                <div class="mb-4 xl:mb-0 flex items-baseline gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Panel de Control</h2>
+                    <span class="hidden sm:inline text-gray-300">|</span>
+                    <p class="text-sm text-gray-500">Bienvenido, <span id="user-display" class="font-bold text-blue-600">Usuario</span></p>
                 </div>
 
-                <div class="flex gap-3">
-                    <button onclick="cargarCalificaciones()"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <div class="flex gap-3 flex-wrap justify-center">
+                    <button onclick="abrirModal()" class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-md font-medium transition flex items-center gap-2">
+                        <i class="bi bi-plus-lg"></i> Nuevo Registro
+                    </button>
+
+                    <button onclick="abrirHistorial()" class="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-md font-medium transition flex items-center gap-2">
+                        <i class="bi bi-shield-lock"></i> Auditoría
+                    </button>
+
+                    <button onclick="cargarCalificaciones()" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition flex items-center gap-2">
                         <i class="bi bi-arrow-clockwise"></i> Actualizar
                     </button>
 
-                    <button onclick="cerrarSesion()"
-                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                    <button onclick="cerrarSesion()" class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 font-medium transition flex items-center gap-2">
                         <i class="bi bi-box-arrow-right"></i> Salir
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
-                    <p class="text-sm text-gray-500">Total registros</p>
-                    <h3 id="stat-total" class="text-4xl font-bold text-blue-700">0</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Registros</p>
+                            <h3 id="stat-total" class="text-4xl font-bold text-blue-700 mt-2">0</h3>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+                            <i class="bi bi-database text-xl"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
-                    <p class="text-sm text-gray-500">Promedio monto base</p>
-                    <h3 id="stat-promedio" class="text-4xl font-bold text-green-600">0</h3>
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 uppercase">Promedio Base</p>
+                            <div id="stat-promedio" class="mt-2">
+                                <h3 class="text-4xl font-bold text-green-600">$0</h3>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg text-green-600">
+                            <i class="bi bi-currency-dollar text-xl"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg">
-                    <p class="text-sm text-gray-500">País más frecuente</p>
-                    <h3 id="stat-top-pais" class="text-3xl font-bold text-purple-700">-</h3>
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 uppercase">País Principal</p>
+                            <h3 id="stat-top-pais" class="text-3xl font-bold text-purple-700 mt-2">-</h3>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg text-purple-600">
+                            <i class="bi bi-globe-americas text-xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
-                    <h3 class="font-bold mb-3">Calificaciones por país</h3>
-                    <canvas id="chartPaises" height="220"></canvas>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Distribución por País</h3>
+                    <div class="h-64">
+                        <canvas id="chartPaises"></canvas>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow border border-gray-200">
-                    <h3 class="font-bold mb-3">Tipos de impuesto</h3>
-                    <canvas id="chartTipos" height="220"></canvas>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Tipos de Impuesto</h3>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="chartTipos"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white mt-10 rounded-2xl shadow border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                
+                <div class="p-5 border-b bg-gray-50 flex flex-col xl:flex-row justify-between items-center gap-4">
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+                        <h3 class="font-bold text-lg text-gray-800 whitespace-nowrap mr-2">Operaciones</h3>
+                        
+                        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg p-1 shadow-sm">
+                            <input type="date" id="fecha-desde" onchange="filtrarDatos()" class="text-xs text-gray-600 outline-none border-none p-1 rounded hover:bg-gray-50 cursor-pointer">
+                            <span class="text-gray-400 text-xs">a</span>
+                            <input type="date" id="fecha-hasta" onchange="filtrarDatos()" class="text-xs text-gray-600 outline-none border-none p-1 rounded hover:bg-gray-50 cursor-pointer">
+                        </div>
 
-                <div class="p-4 border-b">
-                    <h3 class="font-bold text-lg">Detalle de Calificaciones</h3>
+                        <div class="relative w-full sm:w-64">
+                            <i class="bi bi-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                            <input type="text" id="buscador" onkeyup="filtrarDatos()" 
+                                placeholder="Buscar por país, tipo..." 
+                                class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <span class="text-xs text-gray-500 hidden sm:inline-block">Resultados: <span id="contador-registros" class="font-bold text-gray-800">0</span></span>
+                        <button onclick="exportarExcel()" class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition shadow-sm flex items-center gap-2">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Exportar
+                        </button>
+                    </div>
                 </div>
 
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 text-gray-500 uppercase">
-                        <tr>
-                            <th class="p-3">ID</th>
-                            <th class="p-3">País</th>
-                            <th class="p-3">Tipo</th>
-                            <th class="p-3">Monto</th>
-                            <th class="p-3">Factor</th>
-                            <th class="p-3">Analista</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-body"></tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="p-4 font-semibold text-center">ID</th>
+                                <th class="p-4 font-semibold text-center">País</th>
+                                <th class="p-4 font-semibold text-center">Tipo</th>
+                                <th class="p-4 font-semibold text-center">Monto Base</th>
+                                <th class="p-4 font-semibold text-center">Factor</th>
+                                <th class="p-4 font-semibold text-center">Analista</th>
+                                <th class="p-4 font-semibold text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body" class="divide-y divide-gray-100">
+                            </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
     </div>
+
+    <div id="modal-form" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform scale-100 transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modal-titulo" class="text-2xl font-bold text-blue-800">Nuevo Registro</h2>
+                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-lg"></i>
+                </button>
+            </div>
+            
+            <input type="hidden" id="calif-id">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">País</label>
+                    <select id="campo-pais" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="CHILE">Chile</option>
+                        <option value="PERU">Perú</option>
+                        <option value="COLOMBIA">Colombia</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Impuesto</label>
+                    <select id="campo-tipo" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="IVA">IVA / IGV</option>
+                        <option value="RENTA">Impuesto a la Renta</option>
+                        <option value="ADUANA">Aduanero / Arancel</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Monto Base</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-gray-400">$</span>
+                        <input id="campo-monto" type="number" placeholder="Ej: 150000" class="w-full pl-7 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Factor</label>
+                    <input id="campo-factor" type="number" step="0.0001" placeholder="Ej: 0.19" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <p class="text-xs text-gray-400 mt-1">Ejemplo: 0.19 para 19%</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="cerrarModal()" class="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition">Cancelar</button>
+                <button onclick="guardarCalificacion()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-historial" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col m-4">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-purple-800"><i class="bi bi-shield-check mr-2"></i>Log de Auditoría</h2>
+                    <p class="text-xs text-gray-500 mt-1">Registro inmutable de acciones del sistema</p>
+                </div>
+                <button onclick="cerrarHistorial()" class="text-gray-400 hover:text-red-500 transition"><i class="bi bi-x-lg text-xl"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto scroller p-6 bg-gray-50/50">
+                <table class="w-full text-sm text-left bg-white shadow-sm rounded-lg overflow-hidden">
+                    <thead class="bg-purple-50 text-purple-900 uppercase text-xs sticky top-0">
+                        <tr>
+                            <th class="px-6 py-3 font-bold">Fecha</th>
+                            <th class="px-6 py-3 font-bold">Usuario</th>
+                            <th class="px-6 py-3 font-bold text-center">Acción</th>
+                            <th class="px-6 py-3 font-bold">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-body" class="divide-y divide-purple-100">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 border-t bg-white rounded-b-2xl text-right">
+                <button onclick="cerrarHistorial()" class="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium text-sm">Cerrar Monitor</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="cliente_api.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                document.getElementById("login-section").classList.add("show");
+            }, 100);
+        });
+    </script>
 </body>
 </html>
