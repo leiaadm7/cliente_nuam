@@ -5,7 +5,7 @@ let datosGlobales = [];
 let chartPaises = null;
 let chartTipos = null;
 
-
+// ---------------------- LOGIN ------------------------
 async function obtenerToken() {
     const username = document.getElementById("api-username").value;
     const password = document.getElementById("api-password").value;
@@ -38,6 +38,8 @@ async function obtenerToken() {
         mensaje.innerText = "Sin conexión al servidor.";
     }
 }
+
+// ---------------------- NAVEGACIÓN ------------------------
 function mostrarPanelDatos() {
     document.getElementById("login-section").classList.add("hidden");
     const panel = document.getElementById("data-section");
@@ -52,6 +54,7 @@ function cerrarSesion() {
     location.reload(); 
 }
 
+// ---------------------- CARGAR DATOS ------------------------
 async function cargarCalificaciones() {
     try {
         const resp = await fetch(API_URL + "calificaciones/", {
@@ -75,6 +78,7 @@ async function cargarCalificaciones() {
     }
 }
 
+// ---------------------- TABLA ------------------------
 function llenarTabla(data) {
     const tbody = document.getElementById("tabla-body");
     tbody.innerHTML = "";
@@ -112,10 +116,12 @@ function llenarTabla(data) {
         `;
     });
 
+    // Actualizar el contador de registros
     const contador = document.getElementById("contador-registros");
     if (contador) contador.innerText = data.length;
 }
 
+// ---------------------- ESTADÍSTICAS (LISTA ORDENADA) ------------------------
 function actualizarEstadisticas(data) {
     if (!data.length) {
         document.getElementById("stat-total").innerText = "0";
@@ -178,6 +184,7 @@ function actualizarEstadisticas(data) {
     document.getElementById("stat-top-pais").innerText = top ? top[0] : "-";
 }
 
+// ---------------------- GRÁFICOS (COLORES PASTEL) ------------------------
 function graficarPaises(data) {
     const ctx = document.getElementById("chartPaises").getContext("2d");
     if (chartPaises) chartPaises.destroy();
@@ -237,6 +244,7 @@ function graficarTipos(data) {
     });
 }
 
+// ---------------------- MODALES (CRUD & HISTORIAL) ------------------------
 function abrirModal(id = null) {
     const modal = document.getElementById("modal-form");
     modal.classList.remove("hidden");
@@ -333,41 +341,37 @@ function cerrarHistorial() {
     document.getElementById("modal-historial").classList.add("hidden");
 }
 
+// ---------------------- NUEVAS FUNCIONES DE ADMINISTRACIÓN ------------------------
+
+// Función de Búsqueda
 function filtrarDatos() {
     const texto = document.getElementById("buscador").value.toLowerCase();
-    const fDesde = document.getElementById("fecha-desde").value;
-    const fHasta = document.getElementById("fecha-hasta").value;
     
+    // Filtramos sobre la variable global
     const filtrados = datosGlobales.filter(item => {
-
-        const coincideTexto = (
+        return (
             item.pais_nombre.toLowerCase().includes(texto) ||
             item.tipo_nombre.toLowerCase().includes(texto) ||
             item.analista_username.toLowerCase().includes(texto) ||
             item.monto_base.toString().includes(texto)
         );
-        let coincideFecha = true;
-        const fechaItem = new Date(item.fecha_registro).toISOString().split('T')[0]; 
-
-        if (fDesde && fechaItem < fDesde) coincideFecha = false;
-        if (fHasta && fechaItem > fHasta) coincideFecha = false;
-
-        return coincideTexto && coincideFecha;
     });
 
+    // Redibujamos la tabla con los resultados filtrados
     llenarTabla(filtrados);
-    const contador = document.getElementById("contador-registros");
-    if(contador) contador.innerText = filtrados.length;
 }
 
+// Función de Exportar a Excel (CSV)
 function exportarExcel() {
     if (datosGlobales.length === 0) {
         alert("No hay datos para exportar.");
         return;
     }
 
+    // 1. Encabezados
     let csvContent = "ID,PAIS,TIPO,MONTO,FACTOR,ANALISTA,FECHA\n";
 
+    // 2. Datos
     datosGlobales.forEach(row => {
         const fila = [
             row.id,
@@ -380,7 +384,6 @@ function exportarExcel() {
         ].join(",");
         csvContent += fila + "\n";
     });
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
