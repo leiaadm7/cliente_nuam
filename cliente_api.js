@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/api/";
+const API_URL = "https://proyecto-nuam.onrender.com/api";
 
 let token = null;
 let datosGlobales = [];
