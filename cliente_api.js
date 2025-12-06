@@ -12,7 +12,7 @@ async function obtenerToken() {
     const mensaje = document.getElementById("login-message");
 
     if (!username || !password) {
-        mensaje.innerText = "Faltan credenciales.";
+        mensaje.innerText = "Usuario y contraseña requeridos.";
         return;
     }
 
@@ -24,7 +24,7 @@ async function obtenerToken() {
         });
 
         if (!response.ok) {
-            mensaje.innerText = "Usuario o contraseña incorrectos.";
+            mensaje.innerText = "Credenciales incorrectas.";
             return;
         }
 
@@ -33,12 +33,12 @@ async function obtenerToken() {
 
         await identificarUsuario();
 
-        document.getElementById("user-display").innerText = username.toUpperCase();
+        document.getElementById("user-display").innerText = username + " (" + userRole + ")";
         mostrarPanelDatos();
 
     } catch (error) {
         console.error("Error:", error);
-        mensaje.innerText = "Error de conexión.";
+        mensaje.innerText = "Sin conexión al servidor.";
     }
 }
 
@@ -53,7 +53,7 @@ async function identificarUsuario() {
             aplicarPermisosVisuales();
         }
     } catch (e) {
-        console.error("No se pudo identificar rol");
+        console.error("No se pudo identificar el rol");
     }
 }
 
@@ -94,7 +94,7 @@ async function cargarCalificaciones() {
         });
 
         if (resp.status === 401) {
-            alert("Tu sesión expiró.");
+            alert("Sesión caducada.");
             cerrarSesion();
             return;
         }
@@ -279,7 +279,7 @@ function graficarPaises(data) {
             datasets: [{
                 label: "Total",
                 data: Object.values(counts),
-                backgroundColor: ["#93C5FD", "#FDA4AF", "#FCD34D", "#A78BFA"],
+                backgroundColor: ["#93C5FD", "#FDA4AF", "#FCD34D", "#A78BFA", "#6EE7B7"],
                 borderRadius: 6
             }]
         },
@@ -298,7 +298,7 @@ function graficarTipos(data) {
             labels: Object.keys(counts),
             datasets: [{
                 data: Object.values(counts),
-                backgroundColor: ["#5EEAD4", "#C4B5FD", "#FDBA74"],
+                backgroundColor: ["#5EEAD4", "#C4B5FD", "#FDBA74", "#93C5FD"],
                 borderWidth: 0, hoverOffset: 6
             }]
         },
