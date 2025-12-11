@@ -1,4 +1,4 @@
-const API_URL = "https://proyecto-nuam.onrender.com/api";
+const API_URL = "https://proyecto-nuam.onrender.com/api/";
 
 let token = null;
 let datosGlobales = [];
